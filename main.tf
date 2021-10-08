@@ -66,6 +66,7 @@ resource "aws_acm_certificate" "tokyo-kis9b-subs" {
   provider          = aws.tokyo
   domain_name       = "*.${var.domain-kis9b}"
   validation_method = "DNS"
+  provider          = aws.virginia
   tags = {
     Name = var.domain-kis9b
   }
