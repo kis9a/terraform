@@ -1,0 +1,111 @@
+name: plan
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        dir: [domains]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check diff
+        id: diff
+        uses: technote-space/get-diff-action@v4.0.2
+        with:
+          PATTERNS: |
+            ${{ matrix.dir }}/**/*.tf
+
+      - name: Configure aws credentials
+        if: steps.diff.outputs.diff
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Setup terraform
+        if: steps.diff.outputs.diff
+        uses: hashicorp/setup-terraform@v1.3.2
+        with:
+          terraform_version: 1.0.9
+          terraform_wrapper: false
+
+      - name: Check format
+        id: fmt
+        if: steps.diff.outputs.diff
+        run: terraform fmt -check -recursive
+        working-directory: ${{ matrix.dir }}
+
+      - name: Initialize
+        id: init
+        if: steps.diff.outputs.diff
+        run: terraform init
+        working-directory: ${{ matrix.dir }}
+
+      - name: Download modules
+        if: steps.diff.outputs.diff
+        run: terraform get
+        working-directory: ${{ matrix.dir }}
+
+      - name: Validate
+        if: steps.diff.outputs.diff
+        run: terraform validate -no-color
+        working-directory: ${{ matrix.dir }}
+
+      - name: TFSec error check
+        if: steps.diff.outputs.diff
+        uses: reviewdog/action-tfsec@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: ${{ matrix.dir }}
+          reporter: github-pr-review
+          filter_mode: nofilter
+
+      - name: Terraform Plan
+        if: steps.diff.outputs.diff
+        id: plan
+        env:
+          TF_VAR_aws_region: "ap-northeast-1"
+          TF_VAR_aws_profile: "default"
+          TF_VAR_shared_credentials_file: "~/.aws/credentials"
+        run: |
+          terraform plan -no-color 2>&1 | tee /tmp/plan.txt
+          sed -i '/Refreshing state.../d' /tmp/plan.txt
+        working-directory: ${{ matrix.dir }}
+        continue-on-error: true
+
+      - uses: actions/github-script@v4.0.2
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const plan = fs.readFileSync("/tmp/plan.txt", "utf8");
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`hcl
+            ${ plan }
+            \`\`\`
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

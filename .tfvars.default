@@ -1,0 +1,3 @@
+aws_profile="kis9a"
+aws_region="ap-northeast-1"
+shared_credentials_file="/.aws/credentials"

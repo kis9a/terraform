@@ -1,20 +1,23 @@
-# backend
 terraform {
   backend "s3" {
-    key                    = "terraform-me.tfstate"
-    bucket                 = "kis9a-terraform-states"
-    region                 = "ap-northeast-1"
-    profile                = "kis9a"
-    encrypt                = true
-    skip_region_validation = true
+    key     = "terraform-me.tfstate"
+    bucket  = "kis9a-terraform-states"
+    encrypt = true
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "3.63.0"
+    }
   }
 }
 
-# provider
 provider "aws" {
-  profile                = var.aws_profile
-  region                 = var.aws_region
-  skip_region_validation = true
+  region                  = var.aws_region
+  profile                 = var.aws_profile
+  shared_credentials_file = var.shared_credentials_file
+  skip_region_validation  = true
 }
 
 provider "aws" {
@@ -29,15 +32,16 @@ provider "aws" {
   profile = var.aws_profile
 }
 
-# variables
+variable "shared_credentials_file" {
+  type = string
+}
+
 variable "aws_profile" {
-  type    = string
-  default = "kis9a"
+  type = string
 }
 
 variable "aws_region" {
-  type    = string
-  default = "ap-northeast-1"
+  type = string
 }
 
 variable "domain-kis9b" {
