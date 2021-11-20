@@ -14,7 +14,9 @@ variable "fqdn" {
   type = map(string)
   default = {
     dot_kis9a  = "dot.kis9a.com"
+    tf_kis9a   = "tf.kis9a.com"
     zenn_kis9a = "zenn.kis9a.com"
+    gh_kis9a   = "gh.kis9a.com"
   }
 }
 
@@ -22,7 +24,9 @@ variable "redirect_target" {
   type = map(string)
   default = {
     dot_kis9a  = "https://github.com/kis9a/dotfiles"
+    tf_kis9a   = "https://github.com/kis9a/terraform"
     zenn_kis9a = "https://zenn.dev/kis9a"
+    gh_kis9a   = "https://github.com/kis9a"
   }
 }
 
@@ -54,5 +58,21 @@ variable "zenn_kis9a_tags" {
   description = "Tags"
   default = {
     Name = "zenn.kis9a.redirector"
+  }
+}
+
+variable "tf_kis9a_tags" {
+  type        = map(string)
+  description = "Tags"
+  default = {
+    Name = "tf.kis9a.redirector"
+  }
+}
+
+variable "gh_kis9a_tags" {
+  type        = map(string)
+  description = "Tags"
+  default = {
+    Name = "gh.kis9a.redirector"
   }
 }
