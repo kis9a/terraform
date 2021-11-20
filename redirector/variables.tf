@@ -17,6 +17,7 @@ variable "fqdn" {
     tf_kis9a   = "tf.kis9a.com"
     zenn_kis9a = "zenn.kis9a.com"
     gh_kis9a   = "gh.kis9a.com"
+    tw_kis9a   = "tw.kis9a.com"
   }
 }
 
@@ -27,6 +28,7 @@ variable "redirect_target" {
     tf_kis9a   = "https://github.com/kis9a/terraform"
     zenn_kis9a = "https://zenn.dev/kis9a"
     gh_kis9a   = "https://github.com/kis9a"
+    tw_kis9a   = "https://twitter.com/kis9a"
   }
 }
 
@@ -45,34 +47,23 @@ variable "ssl_certificate_arn" {
   }
 }
 
-variable "dot_kis9a_tags" {
-  type        = map(string)
-  description = "Tags"
+variable "tags" {
+  type = map(map(string))
   default = {
-    Name = "dot.kis9a.redirector"
-  }
-}
-
-variable "zenn_kis9a_tags" {
-  type        = map(string)
-  description = "Tags"
-  default = {
-    Name = "zenn.kis9a.redirector"
-  }
-}
-
-variable "tf_kis9a_tags" {
-  type        = map(string)
-  description = "Tags"
-  default = {
-    Name = "tf.kis9a.redirector"
-  }
-}
-
-variable "gh_kis9a_tags" {
-  type        = map(string)
-  description = "Tags"
-  default = {
-    Name = "gh.kis9a.redirector"
+    dot = {
+      Name = "dot.kis9a.redirector"
+    }
+    zenn = {
+      Name = "zenn.kis9a.redirector"
+    }
+    tf = {
+      Name = "tf.kis9a.redirector"
+    }
+    gh = {
+      Name = "gh.kis9a.redirector"
+    }
+    tw = {
+      Name = "tw.kis9a.redirector"
+    }
   }
 }
