@@ -6,7 +6,7 @@ DIRS := $(filter-out $(EXCLUDES), $(wildcard ??*))
 TFVARS = $(shell realpath --relative-to $(dir) $(PWD)/.tfvars)
 TFENV = $(shell realpath --relative-to $(dir) $(PWD)/.tfenv)
 IMAGE_NAME := $(SERVICE)-$(TFVERSION)
-IMAGE := $(shell docker images terraform -q)
+IMAGE := $(shell docker images $(IMAGE_NAME) -q)
 
 env:
 	@echo terraform version $(TFVERSION)
