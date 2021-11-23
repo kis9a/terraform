@@ -1,4 +1,3 @@
-# backend
 terraform {
   backend "s3" {
     key     = "terraform-iam-kis9a.tfstate"
