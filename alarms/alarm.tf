@@ -12,3 +12,97 @@ resource "aws_cloudwatch_metric_alarm" "billing" {
   comparison_operator = "GreaterThanOrEqualToThreshold"
   period              = "21600"
 }
+
+# resource "aws_cloudwatch_metric_alarm" "api_ecsfargate_cpu_high" {
+#   alarm_name          = "${aws_ecs_cluster.service_api.name}-cpu-utilization-high"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "85"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.service_api.name
+#     ServiceName = aws_ecs_service.service_api.name
+#   }
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "api_ecsfargate_cpu_low" {
+#   alarm_name          = "${aws_ecs_cluster.service_api.name}-cpu-utilization-high"
+#   comparison_operator = "LessThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "10"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.service_api.name
+#     ServiceName = aws_ecs_service.service_api.name
+#   }
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "signer_ecsfargate_cpu_high" {
+#   alarm_name          = "${aws_ecs_cluster.service_signer.name}-cpu-utilization-high"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "85"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.service_signer.name
+#     ServiceName = aws_ecs_service.service_signer.name
+#   }
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "signer_ecsfargate_cpu_low" {
+#   alarm_name          = "${aws_ecs_cluster.service_signer.name}-cpu-utilization-high"
+#   comparison_operator = "LessThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "10"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.service_signer.name
+#     ServiceName = aws_ecs_service.service_signer.name
+#   }
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "aurora_rds_cpu_high" {
+#   alarm_name          = "${aws_rds_cluster_instance.cluster_instances[0].id}-cpu-utilization-high"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   statistic           = "Average"
+#   period              = "60"
+#   namespace           = "AWS/RDS"
+#   threshold           = "85"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     DBInstanceIdentifier = aws_rds_cluster_instance.cluster_instances[0].id
+#   }
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "aurora_rds_cpu_low" {
+#   alarm_name          = "${aws_rds_cluster_instance.cluster_instances[0].id}-cpu-utilization-low"
+#   comparison_operator = "LessThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   statistic           = "Average"
+#   period              = "60"
+#   namespace           = "AWS/RDS"
+#   threshold           = "10"
+#   alarm_actions       = [var.alarm_sns_topic_arn]
+#   dimensions = {
+#     DBInstanceIdentifier = aws_rds_cluster_instance.cluster_instances[0].id
+#   }
+# }
