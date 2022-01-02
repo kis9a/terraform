@@ -9,6 +9,17 @@ resource "aws_iam_user" "admin" {
   }
 }
 
+resource "aws_iam_user" "admin_tokyo" {
+  name = "${var.service}-admin-tokyo"
+  tags = {
+    Name = "${var.service}-admin-tokyo"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "aws_iam_user" "maintainer" {
   name = "${var.service}-maintainer"
   tags = {

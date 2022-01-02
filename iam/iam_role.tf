@@ -1,14 +1,14 @@
 resource "aws_iam_role" "ssm_role" {
   name = "${var.service}-ec2-ssm-role"
   assume_role_policy = jsonencode({
-    Version : "2012-10-17",
-    Statement : [
+    Version = "2012-10-17",
+    Statement = [
       {
-        Effect : "Allow",
-        Principal : {
-          Service : "ec2.amazonaws.com",
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com",
         },
-        Action : "sts:AssumeRole"
+        Action = "sts:AssumeRole"
       }
     ]
   })
@@ -20,14 +20,33 @@ resource "aws_iam_role" "ssm_role" {
 resource "aws_iam_role" "chatbot" {
   name = "chatbot-notification-role"
   assume_role_policy = jsonencode({
-    Version : "2012-10-17",
-    Statement : [
+    Version = "2012-10-17",
+    Statement = [
       {
-        Effect : "Allow",
-        Principal : {
-          Service : "chatbot.amazonaws.com"
+        Effect = "Allow",
+        Principal = {
+          Service = "chatbot.amazonaws.com"
         },
-        Action : "sts:AssumeRole"
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "lambda_edge_role" {
+  name = "basic-lambda-edge-execution-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "sts:AssumeRole",
+        Principal = {
+          Service = [
+            "lambda.amazonaws.com",
+            "edgelambda.amazonaws.com"
+          ],
+        },
       }
     ]
   })
