@@ -52,7 +52,7 @@ resource "aws_iam_policy" "limitation_region_tokyo" {
         Effect   = "Deny",
         Condition = {
           StringNotEquals = {
-            "aws:RequestedRegion" : [
+            "aws:RequestedRegion" = [
               "ap-northeast-1"
             ]
           }
@@ -73,7 +73,7 @@ resource "aws_iam_policy" "limitation_region_osaka" {
         Effect   = "Deny",
         Condition = {
           StringNotEquals = {
-            "aws:RequestedRegion" : [
+            "aws:RequestedRegion" = [
               "ap-northeast-3"
             ]
           }
@@ -101,4 +101,53 @@ resource "aws_iam_role_policy" "chatbot" {
       }
     ]
   })
+}
+
+resource "aws_iam_policy" "tf_plan" {
+  name = "tf-plan-role-policy"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Resource = [
+            "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.self.account_id}:log-group:/aws/codebuild/*",
+            "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.self.account_id}:log-group:/aws/codebuild/*"
+          ],
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ]
+        },
+        {
+          Effect = "Allow",
+          Resource = [
+            "arn:aws:s3:::codepipeline-${data.aws_region.current.id}-*"
+          ],
+          Action = [
+            "s3:PutObject",
+            "s3:GetObject",
+            "s3:GetObjectVersion",
+            "s3:GetBucketAcl",
+            "s3:GetBucketLocation"
+          ]
+        },
+        {
+          Effect = "Allow",
+          Action = [
+            "codebuild:CreateReportGroup",
+            "codebuild:CreateReport",
+            "codebuild:UpdateReport",
+            "codebuild:BatchPutTestCases",
+            "codebuild:BatchPutCodeCoverages"
+          ],
+          Resource = [
+            "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.self.account_id}:report-group/*"
+          ]
+        }
+      ]
+    }
+  )
 }
