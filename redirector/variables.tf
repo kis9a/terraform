@@ -3,6 +3,11 @@ variable "aws_profile" {
   default = "kis9a"
 }
 
+variable "shared_credentials_file" {
+  type    = string
+  default = "~/.aws/credentials"
+}
+
 variable "host_zone_id" {
   type = map(string)
   default = {
@@ -13,6 +18,7 @@ variable "host_zone_id" {
 variable "fqdn" {
   type = map(string)
   default = {
+    me_kis9a   = "me.kis9a.com"
     dot_kis9a  = "dot.kis9a.com"
     tf_kis9a   = "tf.kis9a.com"
     zenn_kis9a = "zenn.kis9a.com"
@@ -24,6 +30,7 @@ variable "fqdn" {
 variable "redirect_target" {
   type = map(string)
   default = {
+    me_kis9a   = "https://github.com/kis9a/kis9a"
     dot_kis9a  = "https://github.com/kis9a/dotfiles"
     tf_kis9a   = "https://github.com/kis9a/terraform"
     zenn_kis9a = "https://zenn.dev/kis9a"
@@ -50,6 +57,9 @@ variable "ssl_certificate_arn" {
 variable "tags" {
   type = map(map(string))
   default = {
+    me = {
+      Name = "me.kis9a.redirector"
+    }
     dot = {
       Name = "dot.kis9a.redirector"
     }

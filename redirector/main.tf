@@ -1,3 +1,13 @@
+module "me_kis9a" {
+  source              = "../modules/redirector"
+  host_zone_id        = var.host_zone_id.kis9a
+  fqdn                = var.fqdn.me_kis9a
+  redirect_target     = var.redirect_target.me_kis9a
+  ssl_certificate_arn = var.ssl_certificate_arn.sub_kis9a
+  force_destroy       = var.force_destroy.is
+  tags                = var.tags.me
+}
+
 module "dot_kis9a" {
   source              = "../modules/redirector"
   host_zone_id        = var.host_zone_id.kis9a
