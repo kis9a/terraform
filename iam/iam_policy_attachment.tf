@@ -1,14 +1,34 @@
 ## group
+### admin
 resource "aws_iam_group_policy_attachment" "group_admin_administrator_access" {
   group      = aws_iam_group.admin.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
+### admin_mfa
+resource "aws_iam_group_policy_attachment" "group_admin_mfa_administrator_access" {
+  group      = aws_iam_group.admin_mfa.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
 resource "aws_iam_group_policy_attachment" "group_admin_mfa_required" {
-  group      = aws_iam_group.admin.name
+  group      = aws_iam_group.admin_mfa.name
   policy_arn = aws_iam_policy.mfa_required.arn
 }
 
+### limitation_region_tokyo
+resource "aws_iam_group_policy_attachment" "limitation_region_tokyo" {
+  group      = aws_iam_group.limitation_region_tokyo.name
+  policy_arn = aws_iam_policy.limitation_region_tokyo.arn
+}
+
+### limitation_region_osaka
+resource "aws_iam_group_policy_attachment" "limitation_region_osaka" {
+  group      = aws_iam_group.limitation_region_osaka.name
+  policy_arn = aws_iam_policy.limitation_region_osaka.arn
+}
+
+## readonly
 resource "aws_iam_group_policy_attachment" "group_readonly_readonly_access" {
   group      = aws_iam_group.readonly.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"

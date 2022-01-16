@@ -18,7 +18,7 @@ resource "aws_iam_role" "ssm_role" {
 }
 
 resource "aws_iam_role" "chatbot" {
-  name = "chatbot-notification-role"
+  name = "${var.service}-chatbot-notification-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -34,7 +34,7 @@ resource "aws_iam_role" "chatbot" {
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
-  name = "basic-lambda-edge-execution-role"
+  name = "${var.service}-basic-lambda-edge-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -53,7 +53,7 @@ resource "aws_iam_role" "lambda_edge_role" {
 }
 
 resource "aws_iam_role" "tf_plan" {
-  name = "tf-plan-role"
+  name = "${var.service}-tf-plan-role"
   assume_role_policy = jsonencode(
     {
       Statement = [

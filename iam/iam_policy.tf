@@ -1,9 +1,11 @@
 resource "aws_iam_policy" "mfa_required" {
-  name = "mfa-required-policy"
+  name = "${var.service}-mfa-required-policy"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
+        Sid    = "AllowIndividualUserToManageTheirOwnMFA"
+        Effect = "Allow",
         Action = [
           "iam:CreateVirtualMFADevice",
           "iam:DeleteVirtualMFADevice",
@@ -12,15 +14,15 @@ resource "aws_iam_policy" "mfa_required" {
           "iam:ResyncMFADevice",
           "iam:ListMFADevices"
         ],
-        Sid    = "AllowIndividualUserToManageTheirOwnMFA"
-        Effect = "Allow",
         Resource = [
           "arn:aws:iam::*:mfa/*",
           "arn:aws:iam::*:user/*"
         ]
       },
       {
-        Action = [
+        Sid    = "BlockMostAccessUnlessSignedInWithMFA"
+        Effect = "Deny",
+        NotAction = [
           "iam:CreateVirtualMFADevice",
           "iam:DeleteVirtualMFADevice",
           "iam:DeactivateMFADevice",
@@ -28,8 +30,6 @@ resource "aws_iam_policy" "mfa_required" {
           "iam:ResyncMFADevice",
           "iam:ListMFADevices"
         ],
-        Sid      = "BlockMostAccessUnlessSignedInWithMFA"
-        Effect   = "Deny",
         Resource = "*",
         Condition = {
           BoolIfExists = {
@@ -42,7 +42,7 @@ resource "aws_iam_policy" "mfa_required" {
 }
 
 resource "aws_iam_policy" "limitation_region_tokyo" {
-  name = "only-region-tokyo-allow"
+  name = "${var.service}-only-region-tokyo-allow"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -63,7 +63,7 @@ resource "aws_iam_policy" "limitation_region_tokyo" {
 }
 
 resource "aws_iam_policy" "limitation_region_osaka" {
-  name = "only-region-osaka-allow"
+  name = "${var.service}-only-region-osaka-allow"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -85,7 +85,7 @@ resource "aws_iam_policy" "limitation_region_osaka" {
 
 ## role
 resource "aws_iam_role_policy" "chatbot" {
-  name = "chatbot-notification-policy"
+  name = "${var.service}-chatbot-notification-policy"
   role = aws_iam_role.chatbot.id
   policy = jsonencode({
     Version = "2012-10-17",
@@ -104,7 +104,7 @@ resource "aws_iam_role_policy" "chatbot" {
 }
 
 resource "aws_iam_policy" "tf_plan" {
-  name = "tf-plan-role-policy"
+  name = "${var.service}-tf-plan-role-policy"
   policy = jsonencode(
     {
       Version = "2012-10-17",
@@ -144,7 +144,7 @@ resource "aws_iam_policy" "tf_plan" {
             "codebuild:BatchPutCodeCoverages"
           ],
           Resource = [
-            "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.self.account_id}:report-group/*"
+            "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.self.account_id}:*"
           ]
         }
       ]

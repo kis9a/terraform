@@ -18,6 +18,33 @@ resource "aws_iam_group_membership" "admin" {
   }
 }
 
+## admin mfa
+resource "aws_iam_group" "admin_mfa" {
+  name = "${var.service}-admin-mfa"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+## only tokyo region limitation access
+resource "aws_iam_group" "limitation_region_tokyo" {
+  name = "${var.service}-limitation-region-tokyo"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+## only osaka region limitation access
+resource "aws_iam_group" "limitation_region_osaka" {
+  name = "${var.service}-limitation-region-osaka"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 ## readonly
 resource "aws_iam_group" "readonly" {
   name = "${var.service}-readonly"
