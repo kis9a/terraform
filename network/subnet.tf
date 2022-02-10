@@ -10,7 +10,6 @@ resource "aws_subnet" "dev_public" {
 
   tags = {
     Name = "${var.service}-${var.dev.env}-public-${var.dev_availability_zones[count.index]}"
-    Env  = "${var.dev.env}"
   }
 }
 
@@ -26,7 +25,6 @@ resource "aws_subnet" "dev_app" {
 
   tags = {
     Name = "${var.service}-${var.dev.env}-app-${var.dev_availability_zones[count.index]}"
-    Env  = "${var.dev.env}"
   }
 }
 
@@ -42,6 +40,5 @@ resource "aws_subnet" "dev_db" {
 
   tags = {
     Name = "${var.service}-${var.dev.env}-db-${var.dev_availability_zones[count.index]}"
-    Env  = "${var.dev.env}"
   }
 }

@@ -48,15 +48,15 @@ variable "dev" {
 
 variable "prod_availability_zones" {
   type    = list(string)
-  default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+  default = ["ap-northeast-1a", "ap-northeast-1c"]
 }
 
 variable "stag_availability_zones" {
   type    = list(string)
-  default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+  default = ["ap-northeast-1a", "ap-northeast-1c"]
 }
 
 variable "dev_availability_zones" {
   type    = list(string)
-  default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+  default = ["ap-northeast-1a", "ap-northeast-1c"]
 }

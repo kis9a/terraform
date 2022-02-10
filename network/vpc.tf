@@ -10,6 +10,5 @@ resource "aws_vpc" "dev" {
 
   tags = {
     Name = "${var.service}-${var.dev.env}"
-    Env  = "${var.dev.env}"
   }
 }
