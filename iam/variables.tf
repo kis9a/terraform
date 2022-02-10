@@ -3,11 +3,6 @@ variable "service" {
   default = "tf-iam"
 }
 
-variable "shared_credentials_file" {
-  type    = string
-  default = "~/.aws/credentials"
-}
-
 variable "region_limitation_actions" {
   type = list(string)
   default = [

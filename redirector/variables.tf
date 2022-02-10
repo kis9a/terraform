@@ -3,11 +3,6 @@ variable "aws_profile" {
   default = "kis9a"
 }
 
-variable "shared_credentials_file" {
-  type    = string
-  default = "~/.aws/credentials"
-}
-
 variable "host_zone_id" {
   type = map(string)
   default = {

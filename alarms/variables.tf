@@ -15,8 +15,3 @@ variable "aws_profile" {
   type = string
   default = "kis9a"
 }
-
-variable "shared_credentials_file" {
-  type    = string
-  default = "~/.aws/credentials"
-}

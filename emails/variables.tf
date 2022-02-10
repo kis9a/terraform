@@ -8,11 +8,6 @@ variable "aws_profile" {
   default = "kis9a"
 }
 
-variable "shared_credentials_file" {
-  type    = string
-  default = "~/.aws/credentials"
-}
-
 variable "domain" {
   type = string
   default = "kis9a.com"

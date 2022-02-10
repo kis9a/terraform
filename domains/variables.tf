@@ -1,7 +1,3 @@
-variable "shared_credentials_file" {
-  type = string
-}
-
 variable "aws_profile" {
   type = string
 }
