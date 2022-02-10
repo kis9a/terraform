@@ -1,0 +1,56 @@
+name: merged
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [closed]
+
+jobs:
+  merged:
+    name: merged
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: jwalton/gh-find-current-pr@v1
+        id: prid
+        with:
+          state: closed
+
+      - name: Set COMMIT_MESSAGE
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")" >> $GITHUB_ENV
+
+      - name: Set PR_NUMBER
+        run: echo "PR_NUMBER=${PR}" >> $GITHUB_ENV
+        env:
+          PR: ${{ steps.prid.outputs.pr }}
+
+      - name: Notify merged
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: merged on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "good",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  }
+                ]
+              }
+            ]

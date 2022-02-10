@@ -11,10 +11,23 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        dir: [domains]
+        dir:
+          [
+            iam,
+            emails,
+            networks,
+            notifies/line,
+            domains,
+            alarms,
+            budgets,
+            redirector,
+            basic_auth/stag,
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check diff
         id: diff
@@ -22,6 +35,19 @@ jobs:
         with:
           PATTERNS: |
             ${{ matrix.dir }}/**/*.tf
+
+      - uses: jwalton/gh-find-current-pr@v1
+        id: prid
+        with:
+          state: open
+
+      - name: Set COMMIT_MESSAGE
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")" >> $GITHUB_ENV
+
+      - name: Set PR_NUMBER
+        run: echo "PR_NUMBER=${PR}" >> $GITHUB_ENV
+        env:
+          PR: ${{ steps.prid.outputs.pr }}
 
       - name: Configure aws credentials
         if: steps.diff.outputs.diff
@@ -43,12 +69,87 @@ jobs:
         if: steps.diff.outputs.diff
         run: terraform fmt -check -recursive
         working-directory: ${{ matrix.dir }}
+        continue-on-error: true
+
+      - name: Notify fmt fails
+        if: steps.fmt.outcome != 'success' && steps.diff.outputs.diff
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: fmt failed on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "warn",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "GitHub Actions URL",
+                    "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  },
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Commit URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}/commits/${{ github.event.pull_request.head.sha }}"
+                  },
+                ]
+              }
+            ]
 
       - name: Initialize
         id: init
         if: steps.diff.outputs.diff
         run: terraform init
         working-directory: ${{ matrix.dir }}
+        continue-on-error: true
+
+      - name: Notify init failures
+        if: steps.init.outcome != 'success' && steps.diff.outputs.diff
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: ini failed on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "danger",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "GitHub Actions URL",
+                    "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  },
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Commit URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}/commits/${{ github.event.pull_request.head.sha }}"
+                  }
+                ]
+              }
+            ]
+
+      - name: Exit on init failures
+        if: steps.init.outcome != 'success' && steps.diff.outputs.diff
+        run: |
+          exit 1
 
       - name: Download modules
         if: steps.diff.outputs.diff
@@ -56,9 +157,50 @@ jobs:
         working-directory: ${{ matrix.dir }}
 
       - name: Validate
+        id: validate
         if: steps.diff.outputs.diff
         run: terraform validate -no-color
         working-directory: ${{ matrix.dir }}
+        continue-on-error: true
+
+      - name: Notify validate failures
+        if: steps.validate.outcome != 'success' && steps.diff.outputs.diff
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: validate failed on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "danger",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "GitHub Actions URL",
+                    "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  },
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Commit URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}/commits/${{ github.event.pull_request.head.sha }}"
+                  }
+                ]
+              }
+            ]
+
+      - name: Exit on validate failures
+        if: steps.validate.outcome != 'success' && steps.diff.outputs.diff
+        run: |
+          exit 1
 
       - name: TFSec error check
         if: steps.diff.outputs.diff
@@ -70,7 +212,7 @@ jobs:
           filter_mode: nofilter
 
       - name: Terraform Plan
-        if: steps.diff.outputs.diff
+        if: steps.diff.outputs.diff || github.event_name == 'pull_request'
         id: plan
         env:
           TF_VAR_aws_region: "ap-northeast-1"
@@ -82,8 +224,47 @@ jobs:
         working-directory: ${{ matrix.dir }}
         continue-on-error: true
 
+      - name: Notify plan failures
+        if: steps.plan.outcome != 'success' && steps.diff.outputs.diff
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: plan failed on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "danger",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "GitHub Actions URL",
+                    "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  },
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Commit URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}/commits/${{ github.event.pull_request.head.sha }}"
+                  }
+                ]
+              }
+            ]
+
+      - name: Exit on plan failures
+        if: steps.plan.outcome != 'success' && steps.diff.outputs.diff
+        run: |
+          exit 1
+
       - uses: actions/github-script@v4.0.2
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.diff.outputs.diff
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -109,3 +290,37 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
+      - name: Notify plan success
+        if: steps.plan.outcome == 'success' && steps.diff.outputs.diff
+        uses: tokorom/action-slack-incoming-webhook@master
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK_URL_NOTIFY }}
+        with:
+          text: plan success on ${{ github.server_url }}/${{ github.repository }}/${{ matrix.dir }}
+          attachments: |
+            [
+              {
+                "color": "good",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "GitHub Actions URL",
+                    "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                  },
+                  {
+                    "title": "Github PR URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+                  },
+                  {
+                    "title": "Commit message",
+                    "value": "${{ env.COMMIT_MESSAGE }}"
+                  },
+                  {
+                    "title": "Commit URL",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR_NUMBER }}/commits/${{ github.event.pull_request.head.sha }}"
+                  }
+                ]
+              }
+            ]
