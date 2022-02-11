@@ -5,7 +5,7 @@ resource "aws_cloudwatch_event_rule" "this" {
 }
 
 resource "aws_cloudwatch_event_target" "this" {
-  arn = var.lambda_function_arn
+  arn  = var.lambda_function_arn
   rule = aws_cloudwatch_event_rule.this.name
 }
 

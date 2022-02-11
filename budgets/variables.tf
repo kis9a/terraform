@@ -1,5 +1,5 @@
 variable "account_name" {
-  type = string
+  type    = string
   default = "kis9a"
 }
 
@@ -14,6 +14,6 @@ variable "aws_profile" {
 }
 
 variable "subscriber_emails" {
-  type = list(string)
+  type    = list(string)
   default = ["kis9ax@gmail.com"]
 }

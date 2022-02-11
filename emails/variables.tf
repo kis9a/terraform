@@ -9,11 +9,11 @@ variable "aws_profile" {
 }
 
 variable "domain" {
-  type = string
+  type    = string
   default = "kis9a.com"
 }
 
 variable "host_zone_id" {
-  type = string
+  type    = string
   default = "Z09579232JIYGMEX3JQS5"
 }

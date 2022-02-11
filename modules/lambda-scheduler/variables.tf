@@ -1,13 +1,13 @@
 variable "service" {
-  type    = string
+  type = string
 }
 
 variable "service_tags" {
-  type    = map(string)
+  type = map(string)
 }
 
 variable "redirect_target" {
-  type    = string
+  type = string
 }
 
 variable "lambda_function_arn" {

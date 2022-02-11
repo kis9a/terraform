@@ -14,7 +14,7 @@ resource "aws_acm_certificate" "virginia_kis9a_subs" {
 
 resource "aws_acm_certificate" "tokyo_kis9a" {
   provider          = aws.tokyo
-  domain_name       = "${var.domain_kis9a}"
+  domain_name       = var.domain_kis9a
   validation_method = "DNS"
   tags = {
     Name = var.domain_kis9a
@@ -67,7 +67,7 @@ resource "aws_acm_certificate" "tokyo_kis9b_subs" {
 
 resource "aws_acm_certificate" "tokyo_kis9b" {
   provider          = aws.tokyo
-  domain_name       = "${var.domain_kis9b}"
+  domain_name       = var.domain_kis9b
   validation_method = "DNS"
   tags = {
     Name = var.domain_kis9b

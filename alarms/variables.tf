@@ -7,11 +7,11 @@ variable "billing_threshold" {
 }
 
 variable "aws_region" {
-  type = string
+  type    = string
   default = "ap-northeast-1"
 }
 
 variable "aws_profile" {
-  type = string
+  type    = string
   default = "kis9a"
 }
