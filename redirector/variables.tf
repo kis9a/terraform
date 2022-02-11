@@ -42,13 +42,6 @@ variable "force_destroy" {
   }
 }
 
-variable "ssl_certificate_arn" {
-  type = map(string)
-  default = {
-    sub_kis9a = "arn:aws:acm:us-east-1:298276046670:certificate/55c5ce44-b780-45ea-b5b2-c550cdcde710"
-  }
-}
-
 variable "tags" {
   type = map(map(string))
   default = {
