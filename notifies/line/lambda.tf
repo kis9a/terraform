@@ -17,7 +17,8 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      AWS_COST_LINE_NOTIFY_TOKEN = local.line_token
+      AWS_COST_LINE_NOTIFY_TOKEN = local.lambda_secrets.line_token
+      SLACK_WEBHOOK_URL          = local.lambda_secrets.slack_webhook_url
     }
   }
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,12 +17,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
-)
-
-var (
-	accessToken string
-	accessPoint *url.URL
-	timeh       *TimeHelper
 )
 
 type TimeHelper struct {
@@ -34,6 +31,20 @@ type Tmpl struct {
 	Unit  string
 }
 
+type Slack struct {
+	Text       string `json:"text"`
+	Username   string `json:"username"`
+	Icon_emoji string `json:"icon_emoji"`
+	Icon_url   string `json:"icon_url"`
+}
+
+var (
+	accessToken     string
+	accessPoint     *url.URL
+	slackWebhookUrl string
+	timeh           *TimeHelper
+)
+
 const tmplStr = `
 
 {{.Start}} - {{.End}}
@@ -44,6 +55,9 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	if accessToken = os.Getenv("AWS_COST_LINE_NOTIFY_TOKEN"); accessToken == "" {
 		log.Fatalf("AWS_COST_LINE_NOTIFY_TOKEN is not defined")
+	}
+	if slackWebhookUrl = os.Getenv("SLACK_WEBHOOK_URL"); slackWebhookUrl == "" {
+		log.Printf("SLACK_WEBHOOK_URL is not defined")
 	}
 	var err error
 	accessPoint, err = url.ParseRequestURI("https://notify-api.line.me/api/notify")
@@ -77,9 +91,15 @@ func handler() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = notify(msg + nmsg)
+	err = notifyToLine(msg + nmsg)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if slackWebhookUrl != "" {
+		err = notifyToSlack(msg + nmsg)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -113,7 +133,7 @@ func getCostMonth() (*costexplorer.GetCostAndUsageOutput, error) {
 	}
 }
 
-func notify(message string) error {
+func notifyToLine(message string) error {
 	client := &http.Client{}
 	form := url.Values{}
 	form.Add("message", message)
@@ -126,6 +146,29 @@ func notify(message string) error {
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	_, err = client.Do(req)
 	return err
+}
+
+func notifyToSlack(message string) error {
+	params, err := json.Marshal(Slack{
+		Text:     message,
+		Username: "aws_cost_slack_notify",
+	})
+	if err != nil {
+		fmt.Println("failed to json marshal slack" + fmt.Sprint(err))
+		return err
+	}
+	res, err := http.PostForm(
+		slackWebhookUrl,
+		url.Values{"payload": {string(params)}},
+	)
+	if err != nil {
+		fmt.Println("failed to http request, err:" + fmt.Sprint(err))
+		return err
+	}
+	defer res.Body.Close()
+	contents, _ := ioutil.ReadAll(res.Body)
+	fmt.Printf("Http Status:%s, result: %s\n", res.Status, contents)
+	return nil
 }
 
 func getCostPeriod(granularity string, start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {

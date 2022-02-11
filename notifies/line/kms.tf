@@ -10,13 +10,14 @@ resource "aws_kms_alias" "this" {
   target_key_id = aws_kms_key.this.key_id
 }
 
-data "aws_kms_secrets" "this" {
+data "aws_kms_secrets" "lambda_secrets" {
   secret {
-    name    = "line_token"
-    payload = file("${path.module}/line_token.yaml.encrypted")
+    name    = "${var.service}_secrets"
+    payload = file("${path.module}/secrets.yaml.encrypted")
   }
 }
 
 locals {
-  line_token = yamldecode(data.aws_kms_secrets.this.plaintext["line_token"])
+  lambda_secrets = yamldecode(data.aws_kms_secrets.lambda_secrets.plaintext["${var.service}_secrets"])
 }
+
