@@ -1,17 +1,21 @@
-### Developement
+## About
 
-##### required
+my teams AWS account resources.
+
+## Documentation
+
+[terraform/docs at kis9a/terraform · GitHub](./docs)
+
+## Developement
+
+#### profile
 
 ```sh
 # aws configure
-aws configure
-
-# edit env
-cp .tfenv.default .tfenv
-cp .tfvars.default .tfvars
+aws configure --profile kis9a
 ```
 
-##### docker
+#### docker
 
 ```
 # make
@@ -22,14 +26,22 @@ make plan dir=service
 make fmt dir=service
 make destroy dir=service
 make apply dir=service
+
+# optional and edit
+cp .tfenv.default .tfenv
+cp .tfvars.default .tfvars
 ```
 
-##### pre commit
+#### tfenv
 
 ```
-# format
-make fmt
+# install tfenv
+## brew
+brew install tfenv
 
-# tfsec
-make sec dir=service
+# install terraform
+tfenv install $VERSION
+
+# run
+terraform $SUBCOMAND -chdir=$DIRECTORY -backend-config=.tfenv
 ```
