@@ -19,6 +19,6 @@ variable "subscriber_emails" {
 }
 
 variable "service" {
-  type = string
+  type    = string
   default = "budgets"
 }

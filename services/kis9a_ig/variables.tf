@@ -1,10 +1,10 @@
 variable "service" {
-  type = string
+  type    = string
   default = "kis9a-ig"
 }
 
 variable "bucket_name" {
-  type = string
+  type    = string
   default = "kis9a-ig"
 }
 

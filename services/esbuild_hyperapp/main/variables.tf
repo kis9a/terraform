@@ -1,15 +1,15 @@
 variable "service" {
-  type = string
+  type    = string
   default = "kis9a-esbuild-hyperapp"
 }
 
 variable "env" {
-  type = string
+  type    = string
   default = "main"
 }
 
 variable "bucket_name" {
-  type = string
+  type    = string
   default = "kis9a-esbuild-hyperapp"
 }
 
