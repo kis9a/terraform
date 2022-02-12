@@ -18,12 +18,10 @@ variable "ssm_iam_instance_profile" {
   type = string
 }
 
-variable "subnet_ids" {
+variable "subnet_public_ids" {
   type = list(string)
 }
 
 variable "vpc_id" {
   type = string
 }
-
-variable "app_sg" {}

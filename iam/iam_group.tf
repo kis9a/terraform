@@ -9,7 +9,7 @@ resource "aws_iam_group" "admin" {
 
 resource "aws_iam_group_membership" "admin" {
   name       = "${var.service}-admin"
-  users      = [aws_iam_user.admin.name, aws_iam_user.admin_tokyo.name]
+  users      = [aws_iam_user.admin.name, aws_iam_user.admin_tokyo.name, aws_iam_user.kis9a]
   group      = aws_iam_group.admin.name
   depends_on = [aws_iam_group.admin]
 

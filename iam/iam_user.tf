@@ -63,3 +63,25 @@ resource "aws_iam_user" "frontend" {
     prevent_destroy = true
   }
 }
+
+resource "aws_iam_user" "kis9a" {
+  name = "kis9a"
+  tags = {
+    Name = "${var.service}-kis9a"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_iam_user" "dh4rma" {
+  name = "dh4rma"
+  tags = {
+    Name = "${var.service}-dh4rma"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}

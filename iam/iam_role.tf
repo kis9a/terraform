@@ -74,3 +74,32 @@ resource "aws_iam_role" "tf_plan" {
     aws_iam_policy.tf_plan.arn
   ]
 }
+
+data "aws_iam_policy_document" "ssm_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ssm_role_ec2" {
+  name               = var.ssm_role_ec2
+  assume_role_policy = data.aws_iam_policy_document.ssm_role.json
+
+  tags = {
+    Name = "${var.service}"
+  }
+}
+
+resource "aws_iam_instance_profile" "ssm_role_ec2" {
+  name = var.ssm_role_ec2
+  role = aws_iam_role.ssm_role_ec2.name
+
+  tags = {
+    Name = "${var.service}-ssm-role-ec2"
+  }
+}

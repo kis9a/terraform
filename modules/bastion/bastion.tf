@@ -2,20 +2,17 @@ resource "aws_cloudwatch_log_group" "bastion" {
   name = "${var.service}-bastion-${var.env}-ssm-cloudwatch"
   tags = {
     Name = "${var.service}-bastion-${var.env}-ssm-cloudwatch"
-    Env  = "${var.env}"
   }
 }
 
 resource "aws_launch_template" "bastion" {
   name                                 = "${var.service}-bastion-${var.env}-template"
-  key_name                             = "${var.service}-bastion"
   image_id                             = var.bastion_instance_image
   instance_type                        = var.bastion_instance_type
   instance_initiated_shutdown_behavior = "terminate"
 
   tags = {
     Name = "${var.service}-bastion-${var.env}-template"
-    Env  = "${var.env}"
   }
 
   iam_instance_profile {
@@ -25,7 +22,7 @@ resource "aws_launch_template" "bastion" {
   network_interfaces {
     associate_public_ip_address = true
     delete_on_termination       = true
-    subnet_id                   = var.subnet_ids[0]
+    subnet_id                   = var.subnet_public_ids[0]
     security_groups             = [aws_security_group.bastion_ec2.id]
   }
 
@@ -33,13 +30,12 @@ resource "aws_launch_template" "bastion" {
     resource_type = "instance"
     tags = {
       Name = "${var.service}-bastion-${var.env}"
-      Env  = "${var.env}"
     }
   }
 }
 
 resource "aws_autoscaling_group" "bastion" {
-  vpc_zone_identifier       = [var.subnet_ids[0]]
+  vpc_zone_identifier       = [var.subnet_public_ids[0]]
   health_check_type         = "EC2"
   health_check_grace_period = 300
   max_size                  = 1
@@ -89,7 +85,6 @@ resource "aws_s3_bucket" "bastion" {
 
   tags = {
     Name = "${var.service}-bastion-${var.env}-s3-log"
-    Env  = "${var.env}"
   }
 }
 
@@ -98,7 +93,6 @@ resource "aws_security_group" "bastion_ec2" {
   name   = "${var.service}-bastion-${var.env}-ec2-sg"
   tags = {
     Name = "${var.service}-bastion-${var.env}-ec2-sg"
-    Env  = "${var.env}"
   }
 
   egress {
