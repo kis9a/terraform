@@ -13,5 +13,5 @@ resource "aws_instance" "dev" {
     volume_size = var.dev_ec2_instance_volume_size
   }
 
-  tags = var.dev_scheduler_tag
+  tags = var.dev_scheduler_tag_resource
 }

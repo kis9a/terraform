@@ -78,6 +78,13 @@ variable "dev_rds_instance_user_name" {
   default = "root"
 }
 
+variable "dev_scheduler_tag_resource" {
+  type = map(string)
+  default = {
+    Scheduler = "service-dev"
+  }
+}
+
 variable "dev_scheduler_tag" {
   type = map(string)
   default = {

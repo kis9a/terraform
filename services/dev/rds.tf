@@ -53,7 +53,7 @@ resource "aws_db_option_group" "dev" {
 resource "aws_db_instance" "dev" {
   name                            = "dev"
   identifier                      = "${var.service}-instance"
-  tags                            = var.dev_scheduler_tag
+  tags                            = var.dev_scheduler_tag_resource
   engine                          = var.dev_rds_instance_engine
   engine_version                  = var.dev_rds_instance_engine_version
   instance_class                  = var.dev_rds_instance_class
