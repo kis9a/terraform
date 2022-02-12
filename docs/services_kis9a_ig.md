@@ -2,4 +2,5 @@
 
 serverless frontend s3 + cloudfront
 
-<https://ig.kis9a.com>
+site: <https://ig.kis9a.com>  
+repo: <https://github.com/kis9a/kis9a-ig>
