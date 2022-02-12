@@ -17,3 +17,8 @@ variable "subscriber_emails" {
   type    = list(string)
   default = ["kis9ax@gmail.com"]
 }
+
+variable "service" {
+  type = string
+  default = "budgets"
+}
