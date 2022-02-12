@@ -10,6 +10,10 @@ variable "lambda_role_arn" {
   type = string
 }
 
+variable "path_function" {
+  type = string
+}
+
 variable "basic_auth_credentials" {
   type        = map(any)
   description = "Credentials for Basic Authentication. Pass a map composed of 'user' and 'password'."

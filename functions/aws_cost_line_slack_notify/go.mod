@@ -1,4 +1,4 @@
-module github.com/kis9a/function/aws-cost-line-notify
+module main
 
 go 1.16
 
