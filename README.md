@@ -8,16 +8,16 @@ my teams AWS account resources.
 
 ## Developement
 
-#### profile
+### profile
 
 ```sh
 # aws configure
 aws configure --profile kis9a
 ```
 
-#### docker
+### docker
 
-```
+```sh
 # make
 make help
 make build
@@ -32,9 +32,9 @@ cp .tfenv.default .tfenv
 cp .tfvars.default .tfvars
 ```
 
-#### tfenv
+### tfenv
 
-```
+```sh
 # install tfenv
 ## brew
 brew install tfenv
