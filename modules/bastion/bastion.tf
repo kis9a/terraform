@@ -54,7 +54,7 @@ resource "aws_autoscaling_schedule" "bastion_out" {
   min_size               = 1
   max_size               = 2
   desired_capacity       = 2
-  recurrence             = "30 3 * * *"
+  recurrence             = "30 1 * * *"
   time_zone              = "Asia/Tokyo"
   autoscaling_group_name = aws_autoscaling_group.bastion.name
   depends_on             = [aws_autoscaling_group.bastion]
@@ -65,7 +65,7 @@ resource "aws_autoscaling_schedule" "bastion_in" {
   min_size               = 1
   max_size               = 1
   desired_capacity       = 1
-  recurrence             = "00 4 * * *"
+  recurrence             = "00 8 * * *"
   time_zone              = "Asia/Tokyo"
   autoscaling_group_name = aws_autoscaling_group.bastion.name
   depends_on             = [aws_autoscaling_group.bastion]
