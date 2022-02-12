@@ -95,3 +95,8 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.lambda_edge_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+resource "aws_iam_role_policy_attachment" "amazon_ssm_managed_instanc_core" {
+  role       = aws_iam_role.ssm_role_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
