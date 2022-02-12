@@ -17,3 +17,8 @@ variable "domain_kis9a" {
   type    = string
   default = "kis9a.com"
 }
+
+variable "service" {
+  type = string
+  default = "domains"
+}

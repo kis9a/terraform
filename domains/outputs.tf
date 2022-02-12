@@ -21,3 +21,11 @@ output "kis9a_tokyo_ssl_arn" {
 output "kis9b_tokyo_ssl_arn" {
   value = aws_acm_certificate.tokyo_kis9b.arn
 }
+
+output "kis9a_host_zone_id" {
+  value = aws_route53_zone.kis9a.zone_id
+}
+
+output "kis9b_host_zone_id" {
+  value = aws_route53_zone.kis9b.zone_id
+}

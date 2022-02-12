@@ -1,1 +1,1 @@
-[redirector.md](../docs/redirector.md)
+[redirector.md](../../docs/redirector.md)
