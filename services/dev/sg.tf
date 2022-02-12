@@ -15,14 +15,11 @@ resource "aws_security_group" "dev_ec2_instance" {
 }
 
 resource "aws_security_group_rule" "public" {
-  type      = "ingress"
-  from_port = 22
-  to_port   = 22
-  protocol  = "TCP"
-  cidr_blocks = [
-    data.terraform_remote_state.network_dev.outputs.dev_env.subnet_public_cidr,
-    data.terraform_remote_state.network_dev.outputs.dev_env.subnet_app_cidr
-  ]
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.dev_ec2_instance.id
   depends_on        = [aws_security_group.dev_ec2_instance]
 }
