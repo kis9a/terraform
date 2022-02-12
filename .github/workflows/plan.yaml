@@ -16,11 +16,14 @@ jobs:
             iam,
             emails,
             networks,
-            notifies/line,
             domains,
-            alarms,
-            budgets,
-            redirector,
+            notifies/line,
+            notifies/alarms,
+            notifies/budgets,
+            services/redirector,
+            services/kis9a_ig,
+            services/esbuild_hyperapp/main,
+            services/esbuild_hyperapp/next,
             basic_auth/stag,
           ]
     steps:
