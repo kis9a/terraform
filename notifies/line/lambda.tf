@@ -1,6 +1,6 @@
 data "archive_file" "this" {
   type        = "zip"
-  source_file = "./function/main"
+  source_file = "../../functions/aws_cost_line_slack_notify/main"
   output_path = "./function/main.zip"
 }
 

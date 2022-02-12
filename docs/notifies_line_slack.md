@@ -6,7 +6,7 @@ infrastructure: cloudwatch events trigger -> sns -> lambda -> line, slack
 ## build function
 
 ```
-cd function
+cd functions/aws_cost_notify_line_slack
 GOOS=linux go build -o main
 ```
 
