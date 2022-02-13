@@ -12,6 +12,9 @@ locals {
 resource "aws_db_subnet_group" "dev" {
   name       = "${var.service}-rds-subnet"
   subnet_ids = data.terraform_remote_state.network_dev.outputs.dev_subnet_db_ids
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_db_parameter_group" "dev" {

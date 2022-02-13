@@ -46,8 +46,8 @@ resource "aws_route_table_association" "dev_public_route_table" {
 #   subnet_id      = element(aws_subnet.dev_app.*.id, count.index)
 # }
 
-# resource "aws_route_table_association" "db_route_table" {
-#   count          = 2
-#   route_table_id = element(aws_route_table.dev_private.*.id, count.index)
-#   subnet_id      = element(aws_subnet.dev_db.*.id, count.index)
-# }
+resource "aws_route_table_association" "db_route_table" {
+  count          = 2
+  route_table_id = element(aws_route_table.dev_public.*.id, count.index)
+  subnet_id      = element(aws_subnet.dev_db.*.id, count.index)
+}
