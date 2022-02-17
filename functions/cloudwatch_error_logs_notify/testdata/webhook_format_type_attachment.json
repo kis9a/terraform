@@ -1,0 +1,22 @@
+{
+  "username": "attachments",
+  "text": "attachments text",
+  "icon_emoji": ":ghost:",
+  "attachments": [
+    {
+      "color": "good",
+      "author_name": "$test",
+      "author_icon": "$test",
+      "fields": [
+        {
+          "title": "URL",
+          "value": "https://github.com"
+        },
+        {
+          "title": "message",
+          "value": "test"
+        }
+      ]
+    }
+  ]
+}
