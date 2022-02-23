@@ -45,8 +45,8 @@ resource "aws_cloudwatch_metric_alarm" "billing" {
 #   }
 # }
 
-# resource "aws_cloudwatch_metric_alarm" "signer_ecsfargate_cpu_high" {
-#   alarm_name          = "${aws_ecs_cluster.service_signer.name}-cpu-utilization-high"
+# resource "aws_cloudwatch_metric_alarm" "service_ecsfargate_cpu_high" {
+#   alarm_name          = "${aws_ecs_cluster.service_service.name}-cpu-utilization-high"
 #   comparison_operator = "GreaterThanOrEqualToThreshold"
 #   evaluation_periods  = "2"
 #   metric_name         = "CPUUtilization"
@@ -56,13 +56,13 @@ resource "aws_cloudwatch_metric_alarm" "billing" {
 #   threshold           = "85"
 #   alarm_actions       = [var.alarm_sns_topic_arn]
 #   dimensions = {
-#     ClusterName = aws_ecs_cluster.service_signer.name
-#     ServiceName = aws_ecs_service.service_signer.name
+#     ClusterName = aws_ecs_cluster.service_service.name
+#     ServiceName = aws_ecs_service.service_service.name
 #   }
 # }
 
-# resource "aws_cloudwatch_metric_alarm" "signer_ecsfargate_cpu_low" {
-#   alarm_name          = "${aws_ecs_cluster.service_signer.name}-cpu-utilization-high"
+# resource "aws_cloudwatch_metric_alarm" "service_ecsfargate_cpu_low" {
+#   alarm_name          = "${aws_ecs_cluster.service_service.name}-cpu-utilization-high"
 #   comparison_operator = "LessThanOrEqualToThreshold"
 #   evaluation_periods  = "2"
 #   metric_name         = "CPUUtilization"
@@ -72,8 +72,8 @@ resource "aws_cloudwatch_metric_alarm" "billing" {
 #   threshold           = "10"
 #   alarm_actions       = [var.alarm_sns_topic_arn]
 #   dimensions = {
-#     ClusterName = aws_ecs_cluster.service_signer.name
-#     ServiceName = aws_ecs_service.service_signer.name
+#     ClusterName = aws_ecs_cluster.service_service.name
+#     ServiceName = aws_ecs_service.service_service.name
 #   }
 # }
 
