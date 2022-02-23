@@ -17,17 +17,17 @@ resource "aws_iam_role" "this" {
 resource "aws_iam_role" "apigateway_log" {
   name = "${var.service}-apigateway-log"
   assume_role_policy = jsonencode({
-  Version = "2012-10-17",
-  Statement = [
-    {
-      Action = "sts:AssumeRole",
-      Principal = {
-        Service = "apigateway.amazonaws.com"
-      },
-      Effect = "Allow",
-      Sid = "",
-    }
-  ]
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        },
+        Effect = "Allow",
+        Sid    = "",
+      }
+    ]
   })
 }
 
@@ -57,10 +57,7 @@ resource "aws_iam_policy" "dynamodb" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:DescribeStream",
-          "dynamodb:GetRecords",
-          "dynamodb:GetShardIterator",
-          "dynamodb:ListStreams",
+          "dynamodb:*",
         ],
         Resource = ["*"],
       }
@@ -79,6 +76,6 @@ resource "aws_iam_role_policy_attachment" "dynamodb" {
 }
 
 resource "aws_iam_role_policy_attachment" "apigateway_log" {
-  role       = "${aws_iam_role.apigateway_log.name}"
+  role       = aws_iam_role.apigateway_log.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
 }
