@@ -1,23 +1,16 @@
 resource "aws_dynamodb_table" "this" {
-  name           = "todo"
+  name           = "lambda-sls-todo"
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "id"
-  range_key      = "name"
 
   attribute {
     name = "id"
     type = "S"
   }
 
-  attribute {
-    name = "name"
-    type = "S"
-  }
-
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
-
 }
 
 resource "aws_lambda_event_source_mapping" "this" {

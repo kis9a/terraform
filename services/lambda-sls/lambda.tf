@@ -8,14 +8,10 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      ENDPOINT         = "lambda"
-      AWS_S3_BUCKET    = "kis9a-lambda-sls"
-      ENV              = "prod"
-      SERVER_PORT      = "80"
-      HTTP_AUTH_KEY    = ""
-      HTTP_AUTH_SECRET = ""
-      DB_ENDPOINT      = ""
-      DB_DISABLE_SSL   = ""
+      ENV            = "prod"
+      ENDPOINT       = "lambda"
+      S3_TODO_BUCKET = aws_s3_bucket.images.id
+      DB_TODO_TABLE  = aws_dynamodb_table.this.id
     }
   }
 }
