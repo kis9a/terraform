@@ -16,8 +16,8 @@ import (
 
 var webhooks = []Webhook{
 	{
-		Pattern: "**dev**",
-		URL:     "https://hooks.slack.com/services/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",
+		Pattern: "*LambdaStream_cloudwatchlogs-node*",
+		URL:     "https://hooks.slack.com/services/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",
 	},
 }
 
@@ -85,9 +85,9 @@ func notifyCloudwatchLogsEvent(l events.CloudwatchLogsData) error {
 	if err != nil {
 		return err
 	}
-	webhookURL := getWebhook(l.LogGroup).URL
+	webhookURL := getWebhook(l.SubscriptionFilters[0]).URL
 	if webhookURL == "" {
-		return fmt.Errorf("LogGroup Name does not match a URL")
+		return fmt.Errorf("LogFilter Name does not match a URL")
 	}
 	if err = notify(string(pjson), webhookURL); err != nil {
 		return err
@@ -116,7 +116,7 @@ func getCloudwatchLogsEventPayload(l events.CloudwatchLogsData) (Payload, error)
 			Type: "section",
 			Text: PayloadText{
 				Type: "mrkdwn",
-				Text: strings.Join([]string{"*", l.LogGroup, " ", parseTimeStamp(v.Timestamp), "*"}, ""),
+				Text: strings.Join([]string{"*", l.SubscriptionFilters[0], "*"}, ""),
 			},
 		},
 		)
@@ -124,9 +124,14 @@ func getCloudwatchLogsEventPayload(l events.CloudwatchLogsData) (Payload, error)
 			Type: "section",
 			Text: PayloadText{
 				Type: "plain_text",
-				Text: v.Message,
+				Text: strings.Join([]string{
+					"timestamp: ", parseTimeStamp(v.Timestamp), "\n",
+					"id", v.ID, "\n",
+					"message: ", v.Message, "\n",
+				}, ""),
 			},
-		})
+		},
+		)
 	}
 	return p, nil
 }
