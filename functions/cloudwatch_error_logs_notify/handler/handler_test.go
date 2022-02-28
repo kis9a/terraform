@@ -26,16 +26,6 @@ func TestNotify(t *testing.T) {
 	if err = json.Unmarshal(bytefs, &data); err != nil {
 		t.Fatal(err)
 	}
-	webhookURL := os.Getenv("WEBHOOK_TEST_URL")
-	if webhookURL == "" {
-		t.Fatalf("not found $WEBHOOK_TEST_URL")
-	}
-	webhooks = append(webhooks,
-		Webhook{
-			Pattern: "**testurl**",
-			URL:     webhookURL,
-		},
-	)
 	if err = notifyCloudwatchLogsEvent(data); err != nil {
 		t.Fatal(err)
 	}

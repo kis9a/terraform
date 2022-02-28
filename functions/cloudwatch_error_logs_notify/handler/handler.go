@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambdacontext"
@@ -17,7 +19,7 @@ import (
 var webhooks = []Webhook{
 	{
 		Pattern: "*LambdaStream_cloudwatchlogs-node*",
-		URL:     "https://hooks.slack.com/services/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",
+		URL:     "https://hooks.slack.com/services/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",
 	},
 }
 
@@ -72,8 +74,13 @@ func parseContext(ctx context.Context) (*lambdacontext.LambdaContext, error) {
 }
 
 func parseTimeStamp(t int64) string {
-	// dependence on cloudWatch timestamp_format
-	return fmt.Sprint(t)
+	timestampString := fmt.Sprintf("%d", t)
+	utcTimestamp, err := strconv.Atoi(timestampString[:len(timestampString)-3])
+	fmt.Println(utcTimestamp)
+	if err != nil {
+		return timestampString
+	}
+	return fmt.Sprintf("%s", time.Unix(int64(utcTimestamp), 0).Format("2006-01-02 15:04:05"))
 }
 
 func notifyCloudwatchLogsEvent(l events.CloudwatchLogsData) error {
@@ -125,9 +132,9 @@ func getCloudwatchLogsEventPayload(l events.CloudwatchLogsData) (Payload, error)
 			Text: PayloadText{
 				Type: "plain_text",
 				Text: strings.Join([]string{
-					"timestamp: ", parseTimeStamp(v.Timestamp), "\n",
-					"id", v.ID, "\n",
-					"message: ", v.Message, "\n",
+					"TIMESTAMP: ", fmt.Sprintf("%d", v.Timestamp), " (", parseTimeStamp(v.Timestamp), ")\n",
+					"ID: ", v.ID, "\n",
+					"MESSAGE: ", v.Message, "\n",
 				}, ""),
 			},
 		},
