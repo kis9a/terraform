@@ -62,7 +62,6 @@ resource "aws_iam_group_membership" "readonly" {
   name = "${var.service}-readonly"
   users = [
     aws_iam_user.readonly.name,
-    aws_iam_user.dh4rma.name
   ]
   group      = aws_iam_group.readonly.name
   depends_on = [aws_iam_group.readonly]

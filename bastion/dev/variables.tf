@@ -35,16 +35,6 @@ variable "bastion_instance_image" {
   default = "ami-0df99b3a8349462c6" # ubuntu 20.04
 }
 
-variable "monitor_instance_type" {
-  type    = string
-  default = "t3.nano"
-}
-
-variable "monitor_instance_image" {
-  type    = string
-  default = "ami-0df99b3a8349462c6" # ubuntu 20.04
-}
-
 variable "ssm_iam_instance_profile" {
   type    = string
   default = "ssm-role-ec2"

@@ -74,14 +74,3 @@ resource "aws_iam_user" "kis9a" {
     prevent_destroy = true
   }
 }
-
-resource "aws_iam_user" "dh4rma" {
-  name = "dh4rma"
-  tags = {
-    Name = "${var.service}-dh4rma"
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
