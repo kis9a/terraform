@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# variables
+DEFAULT_AWS_REGION="ap-northeast-1"
+DEFAULT_AWS_PROFILE="kis9a"
+
+# functions
+## stdout help
+help() {
+	cat <<EOF
+
+USAGE:
+  tf_kms [options] [action] [arguments]
+
+OPTIONS:
+  -h|--help: help
+  -p|--profile: aws profile
+  -r|--region: aws region
+
+ACTIONS:
+$(actoins)
+EOF
+}
+
+actoins() {
+	cat <<'EOF'
+  encrypt: encrypt "$kms_alias_suffix" "input_filepath"
+  decrypt: decrypt "$encrypted_filepath"
+  aliases: describe kms alises
+EOF
+}
+
+## $alias_suffix $input_filepath
+kms_encrypt() {
+	local id
+	id=$(aws kms describe-key --key-id alias/"$1" --profile "$AWS_PROFILE" --region "$AWS_REGION" --output json | jq -r .KeyMetadata.KeyId)
+	if [[ -n "$id" ]]; then
+		aws kms encrypt --key-id "$id" --profile "$AWS_PROFILE" --region "$AWS_REGION" --plaintext fileb://"$2" \
+			--output text --query CiphertextBlob
+	fi
+}
+
+## $encrypted_filepath
+kms_decrypt() {
+	aws kms decrypt --ciphertext-blob fileb://<(base64 -D "$1") --output json --profile "$AWS_PROFILE" --region "$AWS_REGION" |
+		jq .Plaintext --raw-output | base64 -D
+}
+
+kms_aliases() {
+	aws kms list-aliases --profile "$AWS_PROFILE" --region "$AWS_REGION" --output json | jq '.Aliases[] | select(contains({ "AliasName": "alias/aws/"}) | not)'
+}
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+	-h | --help)
+		help
+		exit 0
+		;;
+	-r | --region)
+		AWS_REGION="$2"
+		shift
+		shift
+		;;
+	-p | --profile)
+		AWS_PROFILE="$2"
+		shift
+		shift
+		;;
+	*)
+		POSITIONAL_ARGS+=("$1")
+		shift
+		;;
+	esac
+done
+
+# restore parameters
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [[ -z "$AWS_REGION" ]]; then
+	AWS_REGION="$DEFAULT_AWS_REGION"
+fi
+
+if [[ -z "$AWS_PROFILE" ]]; then
+	AWS_PROFILE="$DEFAULT_AWS_PROFILE"
+fi
+
+case "$1" in
+"encrypt")
+	kms_encrypt "$2" "$3"
+	;;
+"decrypt")
+	kms_decrypt "$2"
+	;;
+"aliases")
+	kms_aliases
+	;;
+"-h" | "--help")
+	help
+	exit 0
+	;;
+*)
+	printf "Actoin not found %s\n" "$1" 1>&2
+	help
+	exit 0
+	;;
+esac

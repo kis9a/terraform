@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# variables
+DEFAULT_AWS_REGION="ap-northeast-1"
+DEFAULT_AWS_PROFILE="kis9a"
+
+# functions
+## stdout help
+help() {
+	cat <<EOF
+
+USAGE:
+  tf_ssm [options] [action] [arguments]
+
+OPTIONS:
+  -h|--help: help
+  -p|--profile: aws profile
+  -r|--region: aws region
+
+ACTIONS:
+$(actoins)
+EOF
+}
+
+actoins() {
+	cat <<'EOF'
+  start: ssm start session by $instance_tag_name
+  start_id: ssm start session by $instance_id
+  get_parameter: describe ssm get parameter
+EOF
+}
+
+## $instance_tag_name
+ssm_start_session_by_tag_name() {
+	instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" \
+		--profile "$AWS_PROFILE" --region "$AWS_REGION" --output json | jq -r ".Reservations|.[].Instances|.[].InstanceId")
+	aws ssm start-session --target "$instance" --profile "$AWS_PROFILE" --region "$AWS_REGION"
+}
+
+## $instance_id
+ssm_start_session_by_id() {
+	aws ssm start-session --target "$1" --profile "$AWS_PROFILE"
+}
+
+## $parameter_name
+ssm_get_parameter() {
+	aws ssm get-parameter --name "$1" --profile "$2"
+}
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+	-h | --help)
+		help
+		exit 0
+		;;
+	-r | --region)
+		AWS_REGION="$2"
+		shift
+		shift
+		;;
+	-p | --profile)
+		AWS_PROFILE="$2"
+		shift
+		shift
+		;;
+	*)
+		POSITIONAL_ARGS+=("$1")
+		shift
+		;;
+	esac
+done
+
+# restore parameters
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [[ -z "$AWS_REGION" ]]; then
+	AWS_REGION="$DEFAULT_AWS_REGION"
+fi
+
+if [[ -z "$AWS_PROFILE" ]]; then
+	AWS_PROFILE="$DEFAULT_AWS_PROFILE"
+fi
+
+case "$1" in
+"start")
+	ssm_start_session_by_tag_name "$2"
+	;;
+"start_id")
+	ssm_start_session_by_id "$2"
+	;;
+"get_parameter")
+	ssm_get_parameter "$2"
+	;;
+"-h" | "--help")
+	help
+	exit 0
+	;;
+*)
+	printf "Actoin not found %s\n" "$1" 1>&2
+	help
+	exit 0
+	;;
+esac
