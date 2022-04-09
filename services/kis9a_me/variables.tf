@@ -1,11 +1,11 @@
 variable "service" {
   type    = string
-  default = "kis9a-ig"
+  default = "kis9a-me"
 }
 
 variable "bucket_name" {
   type    = string
-  default = "kis9a-ig"
+  default = "kis9a-me"
 }
 
 variable "region" {

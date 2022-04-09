@@ -39,3 +39,11 @@ output "kis9b_host_zone_id" {
 output "domain_kis9a" {
   value = var.domain_kis9a
 }
+
+output "domain_me_kis9a" {
+  value = var.domain_me_kis9a
+}
+
+output "domain_ig_kis9a" {
+  value = var.domain_ig_kis9a
+}

@@ -1,6 +1,6 @@
 resource "aws_route53_record" "this" {
   zone_id = data.terraform_remote_state.domains.outputs.kis9a_host_zone_id
-  name    = data.terraform_remote_state.domains.outputs.domain_ig_kis9a
+  name    = data.terraform_remote_state.domains.outputs.domain_me_kis9a
   type    = "A"
 
   alias {

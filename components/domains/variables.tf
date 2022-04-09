@@ -22,3 +22,13 @@ variable "service" {
   type    = string
   default = "domains"
 }
+
+variable "domain_me_kis9a" {
+  type    = string
+  default = "me.kis9a.com"
+}
+
+variable "domain_ig_kis9a" {
+  type    = string
+  default = "ig.kis9a.com"
+}

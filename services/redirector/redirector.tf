@@ -1,13 +1,3 @@
-module "me_kis9a" {
-  source              = "../../modules/redirector"
-  host_zone_id        = var.host_zone_id.kis9a
-  fqdn                = var.fqdn.me_kis9a
-  redirect_target     = var.redirect_target.me_kis9a
-  ssl_certificate_arn = data.terraform_remote_state.domains.outputs.sub_kis9a_virginia_ssl_arn
-  force_destroy       = var.force_destroy.is
-  tags                = var.tags.me
-}
-
 module "dot_kis9a" {
   source              = "../../modules/redirector"
   host_zone_id        = var.host_zone_id.kis9a

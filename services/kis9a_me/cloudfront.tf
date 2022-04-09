@@ -1,5 +1,5 @@
 resource "aws_cloudfront_distribution" "website_cdn" {
-  aliases = [data.terraform_remote_state.domains.outputs.domain_ig_kis9a]
+  aliases = [data.terraform_remote_state.domains.outputs.domain_me_kis9a]
   enabled = true
 
   origin {
