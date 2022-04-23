@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "this" {
           Service = "cloudtrail.amazonaws.com"
         },
         Action   = "s3:getbucketacl",
-        Resource = "arn:aws:s3:::kis9a-${var.service}"
+        Resource = "arn:aws:s3:::kis9a-${var.service}/*"
       },
       {
         Sid    = "awscloudtrailwrite",

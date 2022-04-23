@@ -24,10 +24,10 @@ variable "prod" {
   }
 }
 
-variable "stag" {
+variable "stg" {
   type = map(string)
   default = {
-    env                = "stag"
+    env                = "stg"
     vpc_cidr           = "10.10.0.0/16"
     subnet_public_cidr = "10.10.64.0/20"
     subnet_app_cidr    = "10.10.80.0/20"
@@ -51,7 +51,7 @@ variable "prod_availability_zones" {
   default = ["ap-northeast-1a", "ap-northeast-1c"]
 }
 
-variable "stag_availability_zones" {
+variable "stg_availability_zones" {
   type    = list(string)
   default = ["ap-northeast-1a", "ap-northeast-1c"]
 }

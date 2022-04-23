@@ -3,7 +3,7 @@ module "lambda" {
   service         = var.service
   env             = var.env
   lambda_role_arn = module.iam.lambda_role_arn
-  path_function   = abspath("../../functions/cloudfront_basic_authentication")
+  path_function   = abspath("../../../functions/cloudfront_basic_authentication")
   basic_auth_credentials = {
     user     = local.basic_auth_secrets.user
     password = local.basic_auth_secrets.password

@@ -1,6 +1,6 @@
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
+  default = "ap-northeast-1"
 }
 
 variable "aws_profile" {
@@ -10,10 +10,5 @@ variable "aws_profile" {
 
 variable "service" {
   type    = string
-  default = "basic-auth"
-}
-
-variable "env" {
-  type    = string
-  default = "stag"
+  default = "kis9a-ecr"
 }
