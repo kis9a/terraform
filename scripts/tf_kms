@@ -18,11 +18,11 @@ OPTIONS:
   -r|--region: aws region
 
 ACTIONS:
-$(actoins)
+$(actions)
 EOF
 }
 
-actoins() {
+actions() {
 	cat <<'EOF'
   encrypt: encrypt "$kms_alias_suffix" "input_filepath"
   decrypt: decrypt "$encrypted_filepath"

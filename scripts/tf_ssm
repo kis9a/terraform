@@ -18,11 +18,11 @@ OPTIONS:
   -r|--region: aws region
 
 ACTIONS:
-$(actoins)
+$(actions)
 EOF
 }
 
-actoins() {
+actions() {
 	cat <<'EOF'
   start: ssm start session by $instance_tag_name
   start_id: ssm start session by $instance_id

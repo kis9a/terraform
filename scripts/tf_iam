@@ -1,0 +1,344 @@
+#!/bin/bash
+
+# variables
+DEFAULT_AWS_REGION="ap-northeast-1"
+DEFAULT_AWS_PROFILE="kis9a"
+
+# functions
+## stdout help
+help() {
+	cat <<EOF
+USAGE:
+  tf_iam [options] [action] [arguments]
+
+OPTIONS:
+  -h|--help: help
+  -p|--profile: aws profile
+  -r|--region: aws region
+
+ACTIONS:
+$(actions)
+
+EXAMPLES:
+$(examples)
+EOF
+}
+
+actions() {
+	cat <<'EOF'
+  users: list IAM users
+  user_names: list IAM user names
+  delete_user: $user_name delete IAM user
+  create_user: $user_name
+  add_user_to_group: $user_name $group_name add IAM user to IAM group
+  remove_user_from_group: $user_name $group_name remove IAM user freom IAM group
+  goups: list IAM groups
+  group_policies: $group_name list IAM group policy names
+  policies: list IAM policies
+  roles: list IAM roles
+EOF
+}
+
+examples() {
+	cat <<'EOF'
+  tf_iam users
+  tf_iam user_names
+  tf_iam create_user hoge
+  tf_iam delete_user fuga
+  tf_iam add_user_to_group hoge admin-group
+  tf_iam remove_user_from_group fuga admin-group
+  tf_iam groups
+  tf_iam group_policies admin-group
+  tf_iam policies
+  tf_iam roles
+EOF
+}
+
+iam_groups() {
+	aws iam list-groups --profile "$AWS_PROFILE" --output json | jq '.Groups'
+}
+
+iam_group_names() {
+	aws iam list-groups --profile "$AWS_PROFILE" --output json | jq -r '.Groups | .[] | .GroupName'
+}
+
+iam_users() {
+	aws iam list-users --profile "$AWS_PROFILE" --output json | jq '.Users'
+}
+
+iam_user_create() {
+	aws iam create-user --user-name "$1" --profile "$AWS_PROFILE" --output json | jq .User
+}
+
+iam_add_user_to_group() {
+	aws iam add-user-to-group --user-name "$1" --group-name "$2" --profile "$AWS_PROFILE" --output json | jq .
+}
+
+iam_remove_user_from_group() {
+	aws iam remove-user-from-group --user-name "$1" --group-name "$2" --profile "$AWS_PROFILE" --output json | jq .
+}
+
+# UserName
+iam_list_groups_for_user_names() {
+	aws iam list-groups-for-user --user-name "$1" --profile "$AWS_PROFILE" --output json | jq -r '.Groups | .[] | .GroupName'
+}
+
+# GroupName
+iam_list_attached_group_policies() {
+	aws iam list-attached-group-policies --group-name "$1" --profile "$AWS_PROFILE" --output json | jq -r '.AttachedPolicies | .[] | .PolicyName'
+}
+
+# UserName
+iam_list_attached_user_policies() {
+	aws iam list-attached-user-policies --user-name "$1" --profile "$AWS_PROFILE" --output json | jq -r '.AttachedPolicies | .[] | .PolicyName'
+}
+
+# UserName
+iam_user() {
+	local groupNames
+	local g
+	local p
+
+	printf "UserName: %s\n" "$1"
+
+	printf "Policies:\n"
+	while read -r p; do
+		printf "  %s\n" "$p"
+	done <<<"$(iam_list_attached_user_policies "$1")"
+
+	groupNames="$(iam_list_groups_for_user_names "$1")"
+
+	while read -r g; do
+		printf "GroupName: %s\n" "$g"
+		printf "  Policies:%s\n" ""
+
+		while read -r p; do
+			printf "    %s\n" "$p"
+		done <<<"$(iam_list_attached_group_policies "$g")"
+
+		new_line
+	done <<<"$groupNames"
+
+}
+
+# UserName
+iam_user_create_access_key() {
+	aws iam create-access-key --user-name "$1" --profile "$AWS_PROFILE" --output json | jq -r '.AccessKey'
+}
+
+iam_user_names() {
+	aws iam list-users --profile "$AWS_PROFILE" --output json | jq -r '.Users | .[]  | .UserName'
+}
+
+iam_policies() {
+	aws iam list-policies --profile "$AWS_PROFILE" --output json --query "Policies[].{PolicyName:PolicyName, Path:Path, AttachmentCount:AttachmentCount, CreateDate:CreateDate, UpdateDate:UpdateDate}" | jq .
+}
+
+iam_roles() {
+	aws iam list-roles --profile "$AWS_PROFILE" --output json --query "Roles[].{RoleName:RoleName, Arn:Arn, Description:Description, Path:Path, CreateDate:CreateDate, AssumeRolePolicyDocument:AssumeRolePolicyDocument}" | jq
+}
+
+iam_access_key_ids() {
+	aws iam list-access-keys --user-name "$1" --profile "$AWS_PROFILE" --output json | jq -r '.AccessKeyMetadata | .[] | .AccessKeyId'
+}
+
+iam_delete_user() {
+	local g
+	local GroupNames
+	GroupNames="$(iam_group_names)"
+	while read -r g; do
+		iam_remove_user_from_group "$1" "$g"
+	done <<<"$GroupNames"
+	iam_delete_access_keys "$1"
+	aws iam delete-user --user-name "$1" --profile "$AWS_PROFILE" --output json | jq .
+}
+
+iam_delete_access_keys() {
+	local keyIds
+	keyIds="$(iam_access_key_ids "$1")"
+	if [[ -n "$keyIds" ]]; then
+		local k
+		while read -r k; do
+			iam_delete_access_key "$k" "$1"
+		done <<<"$keyIds"
+	fi
+}
+
+iam_delete_access_key() {
+	aws iam delete-access-key --access-key-id "$1" --user-name "$2" --profile "$AWS_PROFILE" --output json | jq .
+}
+
+new_line() {
+	printf "\n"
+}
+
+is_yes() {
+	read -p "$1 [Y/N]: " -n 1 -r
+	new_line
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+select_groups() {
+	local gs
+	gs="$(iam_group_names)"
+	printf "GroupNames:\n%s\n" "$gs"
+	ask_user_into_group "$gs" "$1"
+}
+
+ask_user_into_group() {
+	read -p "Enter group name for user, or Enter \"done\" to quit: > " -r
+	if [[ "$REPLY" == "done" ]]; then
+		return 0
+	fi
+
+	local garr
+	local g
+	garr=()
+	while read -r g; do
+		garr+=("$g")
+	done <<<"$1"
+
+	if ! is_array_contains "$REPLY" "${garr[@]}"; then
+		printf "\"%s\" group is Not found\n" "$REPLY"
+	else
+		iam_add_user_to_group "$2" "$REPLY"
+		printf "user into group \"%s\"\n" "$REPLY"
+	fi
+	ask_user_into_group "$1" "$2"
+}
+
+is_array_contains() {
+	local i
+	local j
+	for i in "$@"; do
+		if [[ $j -ne 0 ]]; then
+			if [[ "$1" == "$i" ]]; then
+				return 0
+			fi
+		fi
+		((j++))
+	done
+	return 1
+}
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+	-h | --help)
+		help
+		exit 0
+		;;
+	-r | --region)
+		AWS_REGION="$2"
+		shift
+		shift
+		;;
+	-p | --profile)
+		AWS_PROFILE="$2"
+		shift
+		shift
+		;;
+	*)
+		POSITIONAL_ARGS+=("$1")
+		shift
+		;;
+	esac
+done
+
+# restore parameters
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [[ -z "$AWS_REGION" ]]; then
+	AWS_REGION="$DEFAULT_AWS_REGION"
+fi
+
+if [[ -z "$AWS_PROFILE" ]]; then
+	AWS_PROFILE="$DEFAULT_AWS_PROFILE"
+fi
+
+case "$1" in
+"user")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "UserName is required"
+		exit 1
+	fi
+	iam_user "$2"
+	;;
+"users")
+	iam_users
+	;;
+"user_names")
+	iam_user_names
+	;;
+"create_user")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "UserName is required"
+		exit 1
+	fi
+	printf "%s\n" "$(iam_user_create "$2")" >/dev/null
+	select_groups "$2"
+	new_line
+	iam_user "$2"
+	iam_user_create_access_key "$2" | jq -r '"ACCESS_KEY_ID: " + .AccessKeyId + "\n" + "SECRET_ACCESS_KEY: " + .SecretAccessKey'
+	;;
+"remove_user_from_group")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "UserName is required"
+		exit 1
+	fi
+	if [[ -z "$3" ]]; then
+		printf "%s\n" "GroupName is required"
+		exit 1
+	fi
+	iam_remove_user_from_group "$2" "$3"
+	;;
+"add_user_to_group")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "UserName is required"
+		exit 1
+	fi
+	if [[ -z "$3" ]]; then
+		printf "%s\n" "GroupName is required"
+		exit 1
+	fi
+	iam_add_user_to_group "$2" "$3"
+	;;
+"groups")
+	iam_groups
+	;;
+"group_policies")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "GroupName is required"
+		exit 1
+	fi
+	iam_list_attached_group_policies "$2"
+	;;
+"delete_user")
+	if [[ -z "$2" ]]; then
+		printf "%s\n" "UserName is required"
+		exit 1
+	fi
+	iam_delete_user "$2"
+	;;
+"group_names")
+	iam_group_names
+	;;
+"policies")
+	iam_policies
+	;;
+"roles")
+	iam_roles
+	;;
+"-h" | "--help")
+	help
+	exit 0
+	;;
+*)
+	printf "Actoin not found %s\n" "$1" 1>&2
+	help
+	exit 0
+	;;
+esac
