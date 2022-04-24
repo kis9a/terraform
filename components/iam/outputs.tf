@@ -6,14 +6,6 @@ output "iam_role_ecs_task_role" {
   value = aws_iam_role.ecs_task_role
 }
 
-output "iam_role_explorer_ecs_task_execution_role" {
-  value = aws_iam_role.explorer_ecs_task_execution_role
-}
-
-output "iam_role_explorer_ecs_task_role" {
-  value = aws_iam_role.explorer_ecs_task_role
-}
-
 output "iam_role_ssm_role" {
   value = aws_iam_role.ssm_role
 }

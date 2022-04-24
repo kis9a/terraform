@@ -151,3 +151,63 @@ resource "aws_iam_policy" "tf_plan" {
     }
   )
 }
+
+resource "aws_iam_policy" "parameter_store_read_access" {
+  name        = "${var.service}-parameter-store-read-access"
+  description = "${var.service} parameter store read access policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssm:GetParameters",
+          "secretsmanager:GetSecretValue",
+          "kms:Decrypt"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:secretsmanager:ap-northeast-1:${data.aws_caller_identity.self.account_id}:secret:*",
+          "arn:aws:ssm:ap-northeast-1:${data.aws_caller_identity.self.account_id}:parameter/*"
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "deploy_ecs_task" {
+  name        = "${var.service}-deploy-ecs-task"
+  description = "${var.service} deploy ecs task policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "VisualEditor0"
+        Action = [
+          "ecs:UpdateService",
+          "ecr:CompleteLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImageTagMutability",
+          "ecr:PutImage",
+          "cloudfront:CreateInvalidation"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:ecr:*:${data.aws_caller_identity.self.account_id}:repository/*",
+          "arn:aws:cloudfront::${data.aws_caller_identity.self.account_id}:distribution/*",
+          "arn:aws:ecs:*:${data.aws_caller_identity.self.account_id}:service/*"
+        ]
+      },
+      {
+        Sid = "VisualEditor1"
+        Action = [
+          "ecs:RegisterTaskDefinition",
+          "ecs:DescribeTaskDefinition"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+    }
+  )
+}

@@ -105,7 +105,7 @@ resource "aws_iam_instance_profile" "ssm_role_ec2" {
 }
 
 resource "aws_iam_role" "bastion_task_exec_role" {
-  name = "${var.prefix}-bastion-task-execution"
+  name = "${var.service}-bastion-task-execution"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = {
@@ -119,7 +119,7 @@ resource "aws_iam_role" "bastion_task_exec_role" {
 }
 
 resource "aws_iam_role_policy" "ecs_exec" {
-  name = "${var.prefix}-ecs-task"
+  name = "${var.service}-ecs-task"
   role = aws_iam_role.bastion_task_exec_role.id
   policy = jsonencode({
     Version = "2012-10-17",
@@ -133,6 +133,45 @@ resource "aws_iam_role_policy" "ecs_exec" {
         ],
         Effect   = "Allow",
         Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs-task-execution-role"
+  tags = {
+    Name = "ecs-task-execution-role"
+  }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["sts:AssumeRole"]
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecs-task-role"
+  tags = {
+    Name = "ecs-task-role"
+  }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = ["sts:AssumeRole"]
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
       }
     ]
   })

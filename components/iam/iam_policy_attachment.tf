@@ -100,3 +100,21 @@ resource "aws_iam_role_policy_attachment" "amazon_ssm_managed_instanc_core" {
   role       = aws_iam_role.ssm_role_ec2.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
+## ecs-task-execution-role
+resource "aws_iam_role_policy_attachment" "parameter_store_read_access" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.parameter_store_read_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "deploy_ecs_task" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.deploy_ecs_task.arn
+}
+
+resource "aws_iam_role_policy_attachment" "amazon_ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+## ecs-task-role
