@@ -10,5 +10,10 @@ variable "aws_profile" {
 
 variable "service" {
   type    = string
-  default = "ecs"
+  default = "kis9a-ecr"
+}
+
+variable "service_example" {
+  type    = string
+  default = "ecs-example"
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "command": ["./server"],
+    "entryPoint": null,
+    "essential": true,
+    "image": "${ECR_ACCOUNT_URL}/kis9a/demo:v1.0",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/example-ecs-web-server",
+        "awslogs-region": "ap-northeast-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "name": "example-ecs-web-server",
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "hostPort": 8080,
+        "protocol": "tcp"
+      }
+    ]
+  }
+]
