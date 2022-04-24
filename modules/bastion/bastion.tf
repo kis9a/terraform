@@ -1,18 +1,18 @@
 resource "aws_cloudwatch_log_group" "bastion" {
-  name = "${var.service}-bastion-${var.env}-ssm-cloudwatch"
+  name = "${var.service}-${var.env}-ssm-cloudwatch"
   tags = {
-    Name = "${var.service}-bastion-${var.env}-ssm-cloudwatch"
+    Name = "${var.service}-${var.env}-ssm-cloudwatch"
   }
 }
 
 resource "aws_launch_template" "bastion" {
-  name                                 = "${var.service}-bastion-${var.env}-template"
+  name                                 = "${var.service}-${var.env}-template"
   image_id                             = var.bastion_instance_image
   instance_type                        = var.bastion_instance_type
   instance_initiated_shutdown_behavior = "terminate"
 
   tags = {
-    Name = "${var.service}-bastion-${var.env}-template"
+    Name = "${var.service}-${var.env}-template"
   }
 
   iam_instance_profile {
@@ -29,7 +29,7 @@ resource "aws_launch_template" "bastion" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "${var.service}-bastion-${var.env}"
+      Name = "${var.service}-${var.env}"
     }
   }
 }
@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "bastion" {
 }
 
 resource "aws_autoscaling_schedule" "bastion_out" {
-  scheduled_action_name  = "${var.service}-bastion-${var.env}-scale-out"
+  scheduled_action_name  = "${var.service}-${var.env}-scale-out"
   min_size               = 1
   max_size               = 2
   desired_capacity       = 2
@@ -61,7 +61,7 @@ resource "aws_autoscaling_schedule" "bastion_out" {
 }
 
 resource "aws_autoscaling_schedule" "bastion_in" {
-  scheduled_action_name  = "${var.service}-bastion-${var.env}-scale-in"
+  scheduled_action_name  = "${var.service}-${var.env}-scale-in"
   min_size               = 1
   max_size               = 1
   desired_capacity       = 1
@@ -72,7 +72,7 @@ resource "aws_autoscaling_schedule" "bastion_in" {
 }
 
 resource "aws_s3_bucket" "bastion" {
-  bucket = "${var.service}-bastion-${var.env}-s3"
+  bucket = "${var.service}-${var.env}-s3"
   acl    = "private"
 
   server_side_encryption_configuration {
@@ -84,15 +84,15 @@ resource "aws_s3_bucket" "bastion" {
   }
 
   tags = {
-    Name = "${var.service}-bastion-${var.env}-s3-log"
+    Name = "${var.service}-${var.env}-s3-log"
   }
 }
 
 resource "aws_security_group" "bastion_ec2" {
   vpc_id = var.vpc_id
-  name   = "${var.service}-bastion-${var.env}-ec2-sg"
+  name   = "${var.service}-${var.env}-ec2-sg"
   tags = {
-    Name = "${var.service}-bastion-${var.env}-ec2-sg"
+    Name = "${var.service}-${var.env}-ec2-sg"
   }
 
   egress {
@@ -104,14 +104,14 @@ resource "aws_security_group" "bastion_ec2" {
 }
 
 resource "aws_ssm_document" "bastion" {
-  name            = "${var.service}-bastion-${var.env}-ssm-document"
+  name            = "${var.service}-${var.env}-ssm-document"
   document_type   = "Session"
   document_format = "JSON"
 
   content = <<DOC
 {
     "schemaVersion": "1.0",
-    "description": "${var.service}-bastion-${var.env}-ssm-document",
+    "description": "${var.service}-${var.env}-ssm-document",
     "sessionType": "Standard_Stream",
     "inputs": {
         "s3BucketName": "${aws_s3_bucket.bastion.id}",
