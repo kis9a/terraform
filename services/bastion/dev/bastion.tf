@@ -1,5 +1,5 @@
 module "bastion" {
-  source                   = "../../modules/bastion"
+  source                   = "../../../modules/bastion"
   env                      = var.env
   service                  = var.service
   bastion_instance_type    = var.bastion_instance_type
