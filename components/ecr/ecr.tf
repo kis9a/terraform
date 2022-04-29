@@ -10,8 +10,25 @@ resource "aws_ecr_repository" "mock_server_go_docker" {
   }
 }
 
+resource "aws_ecr_repository" "bastion" {
+  name = "kis9a/bastion"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "aws_ecr_lifecycle_policy" "mock_server_go_docker" {
   repository = aws_ecr_repository.mock_server_go_docker.name
+  policy     = local.lifecycle_policy_expire_more_than_rules
+}
+
+resource "aws_ecr_lifecycle_policy" "bastion" {
+  repository = aws_ecr_repository.bastion.name
   policy     = local.lifecycle_policy_expire_more_than_rules
 }
 
