@@ -14,7 +14,7 @@ variable "vpc_id" {
   type = string
 }
 
-variable "ecr_image_url"  {
+variable "ecr_image_url" {
   type = string
 }
 
