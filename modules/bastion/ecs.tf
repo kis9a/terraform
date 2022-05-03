@@ -47,7 +47,7 @@ resource "aws_ecs_service" "bastion" {
   platform_version       = "1.4.0"
 
   network_configuration {
-    subnets          = var.subnet_ids
+    subnets = var.subnet_ids
 
     security_groups = [
       aws_security_group.bastion.id,
