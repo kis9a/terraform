@@ -1,13 +1,30 @@
-#!/bin/bash
+#!/usr/local/bin/bash
+
+# bash version 4 or later is required
+# /bin/bash --version
+# /usr/local/bin/bash --version
+
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+  printf "bash version 4 or later is required.\nedit shebang for bash" 1>&2
+fi
 
 # variables
-DEFAULT_AWS_REGION="ap-northeast-1"
-DEFAULT_AWS_PROFILE="kis9a"
+readonly DEFAULT_AWS_REGION="ap-northeast-1"
+readonly DEFAULT_AWS_PROFILE="kis9a"
+readonly BASTION_KEY_CLUSTER="cluster"
+readonly BASTION_KEY_SERVICE="service"
+readonly BASTION_KEY_CONTAINER="container"
+
+declare -A BASTION_DEV=(
+  ["$BASTION_KEY_CLUSTER"]="kis9a-ecr-dev"
+  ["$BASTION_KEY_SERVICE"]="bastion-dev"
+  ["$BASTION_KEY_CONTAINER"]="bastion-dev"
+)
 
 # functions
 ## stdout help
 help() {
-	cat <<EOF
+  cat <<EOF
 
 USAGE:
   tf_ssm [options] [action] [arguments]
@@ -19,85 +36,172 @@ OPTIONS:
 
 ACTIONS:
 $(actions)
+
+EXAMPLES:
+$(examples)
 EOF
 }
 
 actions() {
-	cat <<'EOF'
+  cat <<'EOF'
   start: ssm start session by $instance_tag_name
   start_id: ssm start session by $instance_id
   get_parameter: describe ssm get parameter
+  exec_bastion: ecs exec bastion container
+EOF
+}
+
+examples() {
+  cat <<'EOF'
+  tf_ssm start
+  tf_ssm start bastion-dev
+  tf_ssm get_parameter /example-dev/app/env
+  tf_ssm start_id i-0exxxxxxxxxxx123a
+  tf_ssm -p aws-profile exec_bastion tf-stag
 EOF
 }
 
 ## $instance_tag_name
 ssm_start_session_by_tag_name() {
-	instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" \
-		--profile "$AWS_PROFILE" --region "$AWS_REGION" --output json | jq -r ".Reservations|.[].Instances|.[].InstanceId")
-	aws ssm start-session --target "$instance" --profile "$AWS_PROFILE" --region "$AWS_REGION"
+  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" \
+    --profile "$AWS_PROFILE" --region "$AWS_REGION" --output json | jq -r ".Reservations|.[].Instances|.[].InstanceId")
+  aws ssm start-session --target "$instance" --profile "$AWS_PROFILE" --region "$AWS_REGION"
 }
 
 ## $instance_id
 ssm_start_session_by_id() {
-	aws ssm start-session --target "$1" --profile "$AWS_PROFILE"
+  aws ssm start-session --target "$1" --profile "$AWS_PROFILE"
 }
 
 ## $parameter_name
 ssm_get_parameter() {
-	aws ssm get-parameter --name "$1" --profile "$2"
+  aws ssm get-parameter --name "$1" --profile "$AWS_PROFILE"
+}
+
+bastion_names() {
+  cat <<'EOF'
+bastion-dev
+EOF
+}
+
+print_dot_list() {
+  local l
+  while read -r l; do
+    printf "· %s\n" "$l"
+  done <<<"$1"
+}
+
+is_array_contains() {
+  local i
+  local j
+  for i in "$@"; do
+    if [[ $j -ne 0 ]]; then
+      if [[ "$1" == "$i" ]]; then
+        return 0
+      fi
+    fi
+    ((j++))
+  done
+  return 1
+}
+
+is_exsits_bastion_service() {
+  local arr
+  while read -r l; do
+    arr+=("$l")
+  done <<<"$(bastion_names)"
+  if is_array_contains "$1" "${arr[@]}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+bastion_service_map_value() {
+  case $1 in
+    bastion-dev)
+      printf "%s" "${BASTION_DEV["$2"]}"
+      return
+      ;;
+    *)
+      printf "Unknown bastion service %s\n" "$1" 1>&2
+      print_dot_list "$(bastion_names)"
+      exit 1
+      ;;
+  esac
+}
+
+ecs_get_first_task_arn() {
+  aws ecs list-tasks --cluster "$1" --service-name "$2" --output json --profile "$AWS_PROFILE" | jq -r '.taskArns | .[0]'
+}
+
+ecs_exec_bin_bash() {
+  aws ecs execute-command --cluster "$1" --task "$2" --container "$3" --interactive --command /bin/bash --profile "$AWS_PROFILE"
 }
 
 while [[ $# -gt 0 ]]; do
-	case $1 in
-	-h | --help)
-		help
-		exit 0
-		;;
-	-r | --region)
-		AWS_REGION="$2"
-		shift
-		shift
-		;;
-	-p | --profile)
-		AWS_PROFILE="$2"
-		shift
-		shift
-		;;
-	*)
-		POSITIONAL_ARGS+=("$1")
-		shift
-		;;
-	esac
+  case $1 in
+    -h | --help)
+      help
+      exit 0
+      ;;
+    -r | --region)
+      AWS_REGION="$2"
+      shift
+      shift
+      ;;
+    -p | --profile)
+      AWS_PROFILE="$2"
+      shift
+      shift
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
 done
 
 # restore parameters
 set -- "${POSITIONAL_ARGS[@]}"
 
 if [[ -z "$AWS_REGION" ]]; then
-	AWS_REGION="$DEFAULT_AWS_REGION"
+  AWS_REGION="$DEFAULT_AWS_REGION"
 fi
 
 if [[ -z "$AWS_PROFILE" ]]; then
-	AWS_PROFILE="$DEFAULT_AWS_PROFILE"
+  AWS_PROFILE="$DEFAULT_AWS_PROFILE"
 fi
 
 case "$1" in
-"start")
-	ssm_start_session_by_tag_name "$2"
-	;;
-"start_id")
-	ssm_start_session_by_id "$2"
-	;;
-"get_parameter")
-	ssm_get_parameter "$2"
-	;;
-"-h" | "--help")
-	help
-	exit 0
-	;;
-*)
-	printf "Actoin not found %s\n" "$1" 1>&2
-	help
-	exit 0
-	;;
+  "start")
+    ssm_start_session_by_tag_name "$2"
+    ;;
+  "start_id")
+    ssm_start_session_by_id "$2"
+    ;;
+  "exec_bastion")
+    if ! is_exsits_bastion_service "$2"; then
+      printf "Unknown bastion service \"%s\"\n" "$2" 1>&2
+      print_dot_list "$(bastion_names)"
+      exit 1
+    fi
+    cluster="$(bastion_service_map_value "$2" "$BASTION_KEY_CLUSTER")"
+    service="$(bastion_service_map_value "$2" "$BASTION_KEY_SERVICE")"
+    container="$(bastion_service_map_value "$2" "$BASTION_KEY_CONTAINER")"
+    taskArn="$(ecs_get_first_task_arn "$cluster" "$service")"
+    ecs_exec_bin_bash "$cluster" "$taskArn" "$container"
+    ;;
+  "get_parameter")
+    ssm_get_parameter "$2"
+    ;;
+  "-h" | "--help")
+    help
+    exit 0
+    ;;
+  *)
+    printf "Actoin not found %s\n" "$1" 1>&2
+    help
+    exit 0
+    ;;
 esac
