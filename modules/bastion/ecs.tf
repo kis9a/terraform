@@ -48,7 +48,6 @@ resource "aws_ecs_service" "bastion" {
 
   network_configuration {
     subnets          = var.subnet_ids
-    assign_public_ip = true
 
     security_groups = [
       aws_security_group.bastion.id,
