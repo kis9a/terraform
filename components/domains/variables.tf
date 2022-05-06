@@ -32,3 +32,8 @@ variable "domain_ig_kis9a" {
   type    = string
   default = "ig.kis9a.com"
 }
+
+variable "domain_nav_kis9a" {
+  type    = string
+  default = "nav.kis9a.com"
+}

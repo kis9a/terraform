@@ -47,3 +47,7 @@ output "domain_me_kis9a" {
 output "domain_ig_kis9a" {
   value = var.domain_ig_kis9a
 }
+
+output "domain_nav_kis9a" {
+  value = var.domain_nav_kis9a
+}
