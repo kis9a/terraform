@@ -1,0 +1,157 @@
+#!/bin/bash
+
+# readonly global variables
+readonly DEFAULT_AWS_REGION="ap-northeast-1"
+readonly DEFAULT_AWS_PROFILE="kis9a"
+
+# functions
+## stdout help
+help() {
+  cat <<EOF
+
+USAGE:
+  tf_tf [options] [action] [arguments]
+
+OPTIONS:
+  -h|--help: help
+  -p|--profile: aws profile
+  -r|--region: aws region
+
+ACTIONS:
+$(actions)
+
+EXAMPLES:
+$(examples)
+EOF
+}
+
+actions() {
+  cat <<'EOF'
+  a
+EOF
+}
+
+examples() {
+  cat <<'EOF'
+  a
+EOF
+}
+
+new_line() {
+  printf "\n"
+}
+
+is_yes() {
+  read -p "$1 [Y/N]: " -n 1 -r
+  new_line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+module_names() {
+  while read -r f; do
+    grep ^module <"$f" | cut -f 2 -d " " | tr -d \"
+  done < <(find ./*.tf)
+}
+
+ask_service_name() {
+  read -p "Enter service name: > " -r
+  if [[ -z "$REPLY" ]]; then
+    printf "%s" "service name is required"
+    ask_service_name "$@"
+  fi
+  printf "%s" "$REPLY"
+}
+
+ask_service_path() {
+  read -p "Enter service path: > " -r
+  if [[ -z "$REPLY" ]]; then
+    printf "%s" "service path is required"
+    ask_service_path "$@"
+  fi
+  printf "%s" "$REPLY"
+}
+
+ask_service_env() {
+  read -p "Enter service env: or Empty :> " -r
+}
+
+# parse flags
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h | --help)
+      help
+      exit 0
+      ;;
+    -r | --region)
+      AWS_REGION="$2"
+      shift
+      shift
+      ;;
+    -p | --profile)
+      AWS_PROFILE="$2"
+      shift
+      shift
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$AWS_REGION" ]]; then
+  AWS_REGION="$DEFAULT_AWS_REGION"
+fi
+
+if [[ -z "$AWS_PROFILE" ]]; then
+  AWS_PROFILE="$DEFAULT_AWS_PROFILE"
+fi
+
+# restore parameters
+set -- "${POSITIONAL_ARGS[@]}"
+
+case "$1" in
+  "new")
+    cat <<'EOF'
+(Example)
+Enter service name: > network
+Enter service env: > prod
+Enter service path: > components/network/prod
+
+(Ask)
+EOF
+    service="$(ask_service_name)"
+    env="$(ask_service_env)"
+    path="$(ask_service_path)"
+    mkdir -p "$path"
+    touch "$path/provider.tf"
+    touch "$path/variables.tf"
+    touch "$path/backend.tf"
+    if [[ -z "$env" ]]; then
+      echo a
+    fi
+    ;;
+  "output_modules")
+    while read -r m; do
+      cat <<EOF
+output "$m" {
+  value = module.$m
+}
+
+EOF
+    done <<<"$(module_names)"
+    ;;
+  "-h" | "--help")
+    help
+    exit 0
+    ;;
+  *)
+    printf "Action not found %s\n" "$1" 1>&2
+    help
+    exit 0
+    ;;
+esac
